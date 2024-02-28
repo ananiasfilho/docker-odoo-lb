@@ -1,0 +1,38 @@
+version: '3.7'
+services:
+  web_proxy:
+    image: nginx
+    depends_on:
+      - web_odoo
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/config:/etc/nginx
+  web_odoo:
+    image: odoo:16.0
+    depends_on:
+      - db
+#    ports:
+#      - "8069:8069"
+    volumes:
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+      - ./data/filestore:/mnt/filestore
+    deploy:
+      mode: replicated
+      replicas: 2
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo
+#volumes:
+#  odoo_data.vol:
+#    driver: local
+#    driver_opts:
+#      type: nfs
+#      o: nfsvers=4,addr=192.168.5.241,rw
+#      #share: 192.168.5.241:/filestore
+#      device: ":/dados/docker-odoo-lb/data/filestore"
